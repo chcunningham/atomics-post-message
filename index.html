@@ -1,0 +1,59 @@
+<body>
+<p>
+  Console logs tell the story.
+</p>
+<p>
+  This page creates worker "A".
+</p>
+<p>
+  Worker "A"
+  <ol>
+    <li>
+      creates worker "B", and
+    </li>
+    <li>
+      sends it a postMessage() then calls Atomics.wait().
+    </li>
+  </ol>
+  By default "A" will perform steps 1 and 2 synchronously in the same tick. But
+  you may configure an arbitrary setTimeout() delay between 1 and 2 by appending
+  the query <strong>?asyncDelay=N</strong>, where N is any integer >= 0.
+</p>
+<p>
+  Worker "B" just listens for the message from "A".
+</p>
+<p>
+  On Chrome 104.0.5112.101 (Official Build) (64-bit), I observe different
+  behavior with different values for asyncDelay:
+
+  <ul>
+    <li><a href='index.html'>no delay</a> -> worker B never boots</li>
+    <li><a href='index.html?asyncDelay=0'>0 (setImmediate) delay</a> -> worker B never boots</li>
+    <li><a href='index.html?asyncDelay=10'>10 ms delay</a> -> worker B boots, but never hears from</li>
+    <li><a href='index.html?asyncDelay=100'>100 ms delay</a> -> worker B boots and gets A's message</li>
+  </ul>
+</p>
+
+</body>
+
+<script>
+const queryConfig = parseQuery(window.location.search);
+
+let asyncDelay = 'asyncDelay' in queryConfig ? queryConfig.asyncDelay : -1;
+if (asyncDelay != -1)
+  console.log(`asyncDelay = ${asyncDelay}`);
+
+let workerA = new Worker('./worker_a.js');
+workerA.postMessage({asyncDelay: asyncDelay});
+
+function parseQuery(queryString) {
+  let query = {};
+  let substr = queryString[0] === '?' ? queryString.substr(1) : queryString;
+  let pairs = substr.split('&');
+  for (let i = 0; i < pairs.length; i++) {
+      let pair = pairs[i].split('=');
+      query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+  }
+  return query;
+}
+</script>
