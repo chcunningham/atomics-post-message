@@ -1,5 +1,8 @@
 <body>
 <p>
+  <a href=https://crbug.com/1357138>https://crbug.com/1357138</a>
+</p>
+<p>
   Console logs tell the story.
 </p>
 <p>
@@ -29,7 +32,7 @@
   <ul>
     <li><a href='index.html'>no delay</a> -> worker B never boots</li>
     <li><a href='index.html?asyncDelay=0'>0 (setImmediate) delay</a> -> worker B never boots</li>
-    <li><a href='index.html?asyncDelay=10'>10 ms delay</a> -> worker B boots, but never hears from</li>
+    <li><a href='index.html?asyncDelay=10'>10 ms delay</a> -> worker B boots, but never hears from A</li>
     <li><a href='index.html?asyncDelay=100'>100 ms delay</a> -> worker B boots and gets A's message</li>
   </ul>
 </p>
